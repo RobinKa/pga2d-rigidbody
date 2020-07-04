@@ -11,8 +11,8 @@ function App() {
 
     const [time, setTime] = useState(0)
 
-    const [body, setBody] = useState(rb.makeRigidBody2D({ scalar: 1, e01: 5 }, { e02: 1 }))
-    const [body2, setBody2] = useState(rb.makeRigidBody2D({ scalar: 1 }, { e02: -1 }))
+    const [body, setBody] = useState(rb.makePointParticle2D({ scalar: 1, e01: 5 }, { e02: 1 }))
+    const [body2, setBody2] = useState(rb.makePointParticle2D({ scalar: 1 }, { e02: -1 }))
 
     const bodyPos = useMemo(() => {
         return pga.sandwichProduct(pga.makeMultiVector({ e12: 1 }), body.motor)
@@ -54,7 +54,7 @@ function App() {
         return -grav / lineLength
     }, [body, body2])
 
-    const calcForce = useCallback((b1: rb.RigidBody2D, b2: rb.RigidBody2D) => {
+    const calcForce = useCallback((b1: rb.PointParticle2D, b2: rb.PointParticle2D) => {
         // Transform origin with body motors to get space frame positions
         const pos1 = pga.sandwichProduct(pga.makeMultiVector({ e12: 1 }), b1.motor)
         const pos2 = pga.sandwichProduct(pga.makeMultiVector({ e12: 1 }), b2.motor)
@@ -75,8 +75,8 @@ function App() {
         const force = calcForce(body, body2)
         const force2 = calcForce(body2, body)
 
-        setBody(rb.updateRigidBody2D(body, force, dt))
-        setBody2(rb.updateRigidBody2D(body2, force2, dt))
+        setBody(rb.updatePointParticle2D(body, force, dt))
+        setBody2(rb.updatePointParticle2D(body2, force2, dt))
 
         setTime(time + dt)
     }, [body, body2, calcForce, time])
