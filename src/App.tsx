@@ -11,8 +11,8 @@ function App() {
 
     const [time, setTime] = useState(0)
 
-    const [body, setBody] = useState(rb.makeRigidBody2D({ scalar: 1, e01: 5 }, { e02: 1, e12: 0.1 }))
-    const [body2, setBody2] = useState(rb.makeRigidBody2D({ scalar: 1 }, { e02: -1, e12: 0 }))
+    const [body, setBody] = useState(rb.makeRigidBody2D({ scalar: 1, e01: 5 }, { e02: 1 }))
+    const [body2, setBody2] = useState(rb.makeRigidBody2D({ scalar: 1 }, { e02: -1 }))
 
     const bodyPos = useMemo(() => {
         return pga.sandwichProduct(pga.makeMultiVector({ e12: 1 }), body.motor)
