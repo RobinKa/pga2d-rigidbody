@@ -7,6 +7,7 @@ export type PointParticle2D = {
 
 export type RigidBody2D = {
     points: pga.MultiVector[]
+    sleeping: boolean
 } & PointParticle2D
 
 export const makePointParticle2D = (motor: pga.OptionalMultiVector, velocity: pga.OptionalMultiVector) => {
@@ -19,7 +20,8 @@ export const makePointParticle2D = (motor: pga.OptionalMultiVector, velocity: pg
 export const makeRigidBody2D = (motor: pga.OptionalMultiVector, velocity: pga.OptionalMultiVector, points: pga.OptionalMultiVector[]) => {
     return {
         ...makePointParticle2D(motor, velocity),
-        points: points.map(pga.makeMultiVector)
+        points: points.map(pga.makeMultiVector),
+        sleeping: false
     }
 }
 
@@ -97,7 +99,7 @@ export const satCheck = (rb1: RigidBody2D, rb2: RigidBody2D): SatCheckResults =>
     }
 }
 
-export const updatePointParticle2D = (particle: PointParticle2D, force: pga.MultiVector, dt: number) => {
+export const updatePointParticle2D = <T extends PointParticle2D>(particle: T, force: pga.MultiVector, dt: number) => {
     const dMotor = pga.geometricProduct(particle.motor, particle.velocity)
     const dVelocity = pga.multiply(
         pga.dual(pga.add(
@@ -110,6 +112,7 @@ export const updatePointParticle2D = (particle: PointParticle2D, force: pga.Mult
     const velocity = pga.add(particle.velocity, pga.multiply(dVelocity, dt))
 
     return {
+        ...particle,
         motor: pga.div(motor, pga.geometricProduct(motor, pga.reversion(motor)).scalar),
         velocity: velocity
     }

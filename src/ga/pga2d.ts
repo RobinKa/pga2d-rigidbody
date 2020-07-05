@@ -198,3 +198,8 @@ export const repr = (a: MultiVector, digits?: number): string => {
     digits = digits || 3
     return `s: ${a.scalar.toFixed(digits)}, e0: ${a.e0.toFixed(digits)}, e1: ${a.e1.toFixed(digits)}, e2: ${a.e2.toFixed(digits)}, e01: ${a.e01.toFixed(digits)}, e02: ${a.e02.toFixed(digits)}, e12: ${a.e12.toFixed(digits)}, e012: ${a.e012.toFixed(digits)}`
 }
+
+export const pointCoordinates = (a: BiVector): [number, number] => {
+    const magInv = 1 / a.e12
+    return [a.e01 * magInv, a.e02 * magInv]
+}
