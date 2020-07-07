@@ -201,5 +201,5 @@ export const repr = (a: MultiVector, digits?: number): string => {
 
 export const pointCoordinates = (a: BiVector): [number, number] => {
     const magInv = 1 / a.e12
-    return [a.e01 * magInv, a.e02 * magInv]
+    return [-a.e02 * magInv, a.e01 * magInv]
 }

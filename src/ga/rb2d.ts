@@ -25,7 +25,7 @@ export const makeRigidBody2D = (motor: pga.OptionalMultiVector, velocity: pga.Op
     }
 }
 
-const getEdgesFromPoints = (points: pga.MultiVector[]): pga.MultiVector[] => {
+export const getEdgesFromPoints = (points: pga.MultiVector[]): pga.MultiVector[] => {
     const lines = []
     for (let i = 0; i < points.length; i++) {
         lines.push(pga.regressiveProduct(
@@ -53,6 +53,33 @@ const pointsMinMaxDistanceToLine = (points: pga.MultiVector[], line: pga.MultiVe
     }
 
     return [minDist, maxDist]
+}
+
+export const closestPointToLine = (points: pga.MultiVector[], line: pga.MultiVector): pga.MultiVector | undefined => {
+    let minDist = Number.POSITIVE_INFINITY
+    let minPoint: pga.MultiVector | undefined = undefined
+
+    for (const point of points) {
+        const pointNormalized = pga.div(point, point.e12)
+        const lineNormalized = pga.div(line, Math.sqrt(line.e1 * line.e1 + line.e2 * line.e2))
+
+        const dist = Math.abs(pga.exteriorProduct(
+            pointNormalized,
+            lineNormalized
+        ).e012)
+
+        if (dist < minDist) {
+            minDist = dist
+            minPoint = point
+        }
+    }
+
+    return minPoint
+}
+
+export const closestRigidBodyPointToLine = (rb: RigidBody2D, line: pga.MultiVector): pga.MultiVector | undefined => {
+    const worldPoints = rb.points.map(p => pga.sandwichProduct(p, rb.motor))
+    return closestPointToLine(worldPoints, line)
 }
 
 export type SatCheckResults = {
@@ -100,13 +127,11 @@ export const satCheck = (rb1: RigidBody2D, rb2: RigidBody2D): SatCheckResults =>
 }
 
 export const updatePointParticle2D = <T extends PointParticle2D>(particle: T, force: pga.MultiVector, dt: number) => {
-    const dMotor = pga.geometricProduct(particle.motor, particle.velocity)
-    const dVelocity = pga.multiply(
-        pga.dual(pga.add(
-            force,
-            pga.commutatorProduct(pga.dual(particle.velocity), particle.velocity)
-        )), 2
-    )
+    const dMotor = pga.multiply(pga.geometricProduct(particle.motor, particle.velocity), 0.5)
+    const dVelocity = pga.dual(pga.add(
+        force,
+        pga.commutatorProduct(pga.dual(particle.velocity), particle.velocity)
+    ))
 
     const motor = pga.add(particle.motor, pga.multiply(dMotor, dt))
     const velocity = pga.add(particle.velocity, pga.multiply(dVelocity, dt))
