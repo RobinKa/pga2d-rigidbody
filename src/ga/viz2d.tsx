@@ -2,6 +2,12 @@ import React, { useCallback, useState, useEffect, useMemo } from "react"
 import * as pga from "./ga_zpp"
 import * as rb from "./rb2d"
 
+
+export const pointCoordinates = (a: pga.BiVector): [number, number] => {
+    const magInv = 1 / a.e12
+    return [-a.e02 * magInv, a.e01 * magInv]
+}
+
 export type PointElementPGA2DProps = {
     point: pga.BiVector
     radius?: number
@@ -117,7 +123,7 @@ export function RigidBody2DElement(props: RigidBody2DElementProps) {
     const { rigidBody, radius, label } = props
 
     const rbPos = useMemo(() => {
-        return pga.pointCoordinates(
+        return pointCoordinates(
             pga.sandwichProduct(
                 { e12: 1 },
                 rigidBody.motor
@@ -134,7 +140,7 @@ export function RigidBody2DElement(props: RigidBody2DElementProps) {
             // BiVector to xy coordinates
             const rbPoints = rigidBody.points
                 .map(p => pga.sandwichProduct(p, rigidBody.motor))
-                .map(pga.pointCoordinates)
+                .map(pointCoordinates)
 
             // Append first point so we get a closed loop
             return getPolyLinePoints(rbPoints.concat(rbPoints.slice(0, 1)))

@@ -159,18 +159,18 @@ test("dual dual equals identity", () => {
 
 test("join points equals line", () => {
     // X: +1, Y: -1
-    const a = pga.makeMultiVector({
+    const a = {
         e02: -1,
         e01: -1,
         e12: 1,
-    })
+    }
 
     // X: +1, Y: +1
-    const b = pga.makeMultiVector({
+    const b = {
         e02: -1,
         e01: 1,
         e12: 1,
-    })
+    }
 
     // Line at X=1 <=> 1 e1 - 1 e0 = 0
     const c = pga.regressiveProduct(a, b)
@@ -179,12 +179,7 @@ test("join points equals line", () => {
     c.e2 /= c.e0
     c.e0 /= c.e0
 
-    expect(c.scalar).toBeCloseTo(0)
     expect(c.e0).toBeCloseTo(1)
     expect(c.e1).toBeCloseTo(-1)
     expect(c.e2).toBeCloseTo(0)
-    expect(c.e01).toBeCloseTo(0)
-    expect(c.e02).toBeCloseTo(0)
-    expect(c.e12).toBeCloseTo(0)
-    expect(c.e012).toBeCloseTo(0)
 })

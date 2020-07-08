@@ -8,32 +8,16 @@ export type BladeE12 = { e12: number }
 export type BladeE012 = { e012: number }
 
 export type Scalar = BladeScalar
-export type MultiVector = BladeScalar & BladeE0 & BladeE1 & BladeE2 & BladeE01 & BladeE02 & BladeE12 & BladeE012
 export type Vector = BladeE0 & BladeE1 & BladeE2
 export type BiVector = BladeE01 & BladeE02 & BladeE12
 export type TriVector = BladeE012
+export type PseudoTriVector = BladeScalar
+export type PseudoBiVector = BladeE0 & BladeE1 & BladeE2
+export type PseudoVector = BladeE01 & BladeE02 & BladeE12
 export type PseudoScalar = BladeE012
-
-export type Even = Scalar & BiVector
-export type Odd = Vector & PseudoScalar
-
-export const makeMultiVector = <A extends OptionalMultiVector>(mv: A): MultiVector => {
-    return {
-        scalar: mv.scalar || 0,
-        e0: mv.e0 || 0,
-        e1: mv.e1 || 0,
-        e2: mv.e2 || 0,
-        e01: mv.e01 || 0,
-        e02: mv.e02 || 0,
-        e12: mv.e12 || 0,
-        e012: mv.e012 || 0
-    }
-}
-
-export const pointCoordinates = (a: BiVector): [number, number] => {
-    const magInv = 1 / a.e12
-    return [-a.e02 * magInv, a.e01 * magInv]
-}
+export type Even = BladeScalar & BladeE01 & BladeE02 & BladeE12
+export type Odd = BladeE0 & BladeE1 & BladeE2 & BladeE012
+export type MultiVector = BladeScalar & BladeE0 & BladeE1 & BladeE2 & BladeE01 & BladeE02 & BladeE12 & BladeE012
 
 export type OptionalMultiVector = {
     scalar?: number
