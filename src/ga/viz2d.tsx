@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useEffect, useMemo } from "react"
-import * as pga from "./pga2d"
+import * as pga from "./ga_zpp"
 import * as rb from "./rb2d"
 
 export type PointElementPGA2DProps = {

@@ -1,4 +1,4 @@
-import * as pga from "./pga2d"
+import * as pga from "./ga_zpp"
 
 test("geometric product", () => {
     const a = {

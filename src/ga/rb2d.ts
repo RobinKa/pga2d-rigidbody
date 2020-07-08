@@ -1,23 +1,23 @@
-import * as pga from "./pga2d"
+import * as pga from "./ga_zpp"
 
 export type PointParticle2D = {
-    motor: pga.MultiVector
-    velocity: pga.MultiVector
+    motor: pga.Even
+    velocity: pga.Even
 }
 
 export type RigidBody2D = {
-    points: pga.MultiVector[]
+    points: pga.BiVector[]
     sleeping: boolean
 } & PointParticle2D
 
-export const makePointParticle2D = (motor: pga.OptionalMultiVector, velocity: pga.OptionalMultiVector) => {
+export const makePointParticle2D = (motor: pga.Even, velocity: pga.Even) => {
     return {
         motor: pga.makeMultiVector(motor),
         velocity: pga.makeMultiVector(velocity)
     }
 }
 
-export const makeRigidBody2D = (motor: pga.OptionalMultiVector, velocity: pga.OptionalMultiVector, points: pga.OptionalMultiVector[]) => {
+export const makeRigidBody2D = (motor: pga.Even, velocity: pga.Even, points: pga.BiVector[]) => {
     return {
         ...makePointParticle2D(motor, velocity),
         points: points.map(pga.makeMultiVector),
@@ -25,7 +25,7 @@ export const makeRigidBody2D = (motor: pga.OptionalMultiVector, velocity: pga.Op
     }
 }
 
-export const getEdgesFromPoints = (points: pga.MultiVector[]): pga.MultiVector[] => {
+export const getEdgesFromPoints = (points: pga.BiVector[]): pga.Vector[] => {
     const lines = []
     for (let i = 0; i < points.length; i++) {
         lines.push(pga.regressiveProduct(
@@ -36,7 +36,7 @@ export const getEdgesFromPoints = (points: pga.MultiVector[]): pga.MultiVector[]
     return lines
 }
 
-const pointsMinMaxDistanceToLine = (points: pga.MultiVector[], line: pga.MultiVector): [number, number] => {
+const pointsMinMaxDistanceToLine = (points: pga.BiVector[], line: pga.Vector): [number, number] => {
     let minDist = Number.POSITIVE_INFINITY
     let maxDist = Number.NEGATIVE_INFINITY
     for (const point of points) {
@@ -55,9 +55,9 @@ const pointsMinMaxDistanceToLine = (points: pga.MultiVector[], line: pga.MultiVe
     return [minDist, maxDist]
 }
 
-export const closestPointToLine = (points: pga.MultiVector[], line: pga.MultiVector): pga.MultiVector | undefined => {
+export const closestPointToLine = (points: pga.BiVector[], line: pga.Vector): pga.BiVector | undefined => {
     let minDist = Number.POSITIVE_INFINITY
-    let minPoint: pga.MultiVector | undefined = undefined
+    let minPoint: pga.BiVector | undefined = undefined
 
     for (const point of points) {
         const pointNormalized = pga.div(point, point.e12)
@@ -77,7 +77,7 @@ export const closestPointToLine = (points: pga.MultiVector[], line: pga.MultiVec
     return minPoint
 }
 
-export const closestRigidBodyPointToLine = (rb: RigidBody2D, line: pga.MultiVector): pga.MultiVector | undefined => {
+export const closestRigidBodyPointToLine = (rb: RigidBody2D, line: pga.Vector): pga.BiVector | undefined => {
     const worldPoints = rb.points.map(p => pga.sandwichProduct(p, rb.motor))
     return closestPointToLine(worldPoints, line)
 }
@@ -85,7 +85,7 @@ export const closestRigidBodyPointToLine = (rb: RigidBody2D, line: pga.MultiVect
 export type SatCheckResults = {
     overlaps: boolean
     depth?: number
-    line?: pga.MultiVector
+    line?: pga.Vector
 }
 
 export const satCheck = (rb1: RigidBody2D, rb2: RigidBody2D): SatCheckResults => {
@@ -95,7 +95,7 @@ export const satCheck = (rb1: RigidBody2D, rb2: RigidBody2D): SatCheckResults =>
     const edgeLines = getEdgesFromPoints(worldPoints1).concat(getEdgesFromPoints(worldPoints2))
 
     let minDepth = Number.POSITIVE_INFINITY
-    let minDepthEdgeLine: pga.MultiVector | undefined = undefined
+    let minDepthEdgeLine: pga.Vector | undefined = undefined
 
     for (const edgeLine of edgeLines) {
         const [minDist1, maxDist1] = pointsMinMaxDistanceToLine(
@@ -126,7 +126,7 @@ export const satCheck = (rb1: RigidBody2D, rb2: RigidBody2D): SatCheckResults =>
     }
 }
 
-export const updatePointParticle2D = <T extends PointParticle2D>(particle: T, force: pga.MultiVector, dt: number) => {
+export const updatePointParticle2D = <T extends PointParticle2D>(particle: T, force: pga.Vector, dt: number) => {
     const dMotor = pga.multiply(pga.geometricProduct(particle.motor, particle.velocity), 0.5)
     const dVelocity = pga.dual(pga.add(
         force,

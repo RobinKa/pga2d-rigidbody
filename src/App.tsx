@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import './App.css'
-import * as pga from "./ga/pga2d"
+import * as pga from "./ga/ga_zpp"
 import * as rb from "./ga/rb2d"
 import * as viz from './ga/viz2d'
 
@@ -19,7 +19,7 @@ const useInterval = (callback: () => void, ms: number) => {
 }
 
 function App() {
-    const dt = 0.02
+    const dt = 0.001
     const timeDilation = 1
 
     const [time, setTime] = useState(0)
@@ -62,8 +62,8 @@ function App() {
     }, [body1, body2, floor])
 
     const [lastCollInfo, setLastCollInfo] = useState<rb.SatCheckResults>({ line: pga.makeMultiVector({}), depth: 0, overlaps: false })
-    const [contactPointsWorld, setContactPointsWorld] = useState<pga.MultiVector[]>([])
-    const [body1Force, setBody1Force] = useState<pga.MultiVector | null>(null)
+    const [contactPointsWorld, setContactPointsWorld] = useState<pga.BiVector[]>([])
+    const [body1Force, setBody1Force] = useState<pga.Vector | null>(null)
 
     const scene = useMemo<viz.Scene>(() => {
         return {
@@ -95,10 +95,10 @@ function App() {
             }]),
             infos: [
                 `t: ${time.toFixed(3)}`,
-                `P0: ${pga.repr(pga.sandwichProduct(pga.makeMultiVector({ e12: 1 }), bodies[0].motor))}`,
-                `V0: ${pga.repr(bodies[0].velocity)}`,
-                `P1: ${pga.repr(pga.sandwichProduct(pga.makeMultiVector({ e12: 1 }), bodies[1].motor))}`,
-                `V1: ${pga.repr(bodies[1].velocity)}`,
+                //`P0: ${pga.repr(pga.sandwichProduct(pga.makeMultiVector({ e12: 1 }), bodies[0].motor))}`,
+                //`V0: ${pga.repr(bodies[0].velocity)}`,
+                //`P1: ${pga.repr(pga.sandwichProduct(pga.makeMultiVector({ e12: 1 }), bodies[1].motor))}`,
+                //`V1: ${pga.repr(bodies[1].velocity)}`,
                 `Coll depth: ${lastCollInfo.depth!.toFixed(5)}`
             ]
         }
@@ -137,7 +137,7 @@ function App() {
 
             const rotor = pga.add(pga.makeMultiVector({ scalar: 1 }), pga.multiply(tangentDir, -coll.depth)) //pga.exponential(pga.multiply(tangent, coll.depth/2))
             console.log("rotor:", rotor)
-            //newBody1.motor = pga.geometricProduct(rotor, newBody1.motor)
+            newBody1.motor = pga.geometricProduct(rotor, newBody1.motor)
 
             const contactPoint = rb.closestRigidBodyPointToLine(newBody1, coll.line)!
 
@@ -147,6 +147,8 @@ function App() {
             console.log("Tangent line:", coll.line)
             console.log("Normal line body:", normalLineBody)
             console.log("Vel:", newBody1.velocity)
+
+            const normalVelocityBody = pga.geometricProduct(pga.innerProduct(newBody1.velocity, normalLineBody), normalLineBody)
 
             const velLength = Math.sqrt(newBody1.velocity.e01 * newBody1.velocity.e01 + newBody1.velocity.e02 * newBody1.velocity.e02)
 
@@ -171,7 +173,6 @@ function App() {
 
             //setTime(10)
         }
-
 
         newBody1 = body1.sleeping ? body1 : rb.updatePointParticle2D(body1, force1, timeDilation * dt)
         newBody2 = rb.updatePointParticle2D(body2, gravity, timeDilation * dt)

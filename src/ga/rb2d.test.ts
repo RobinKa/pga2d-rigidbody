@@ -1,5 +1,5 @@
 import * as rb from "./rb2d"
-import * as pga from "./pga2d"
+import * as pga from "./ga_zpp"
 
 test("boxes overlap", () => {
     for (let offsetX = -3; offsetX <= 3; offsetX += 0.1) {
