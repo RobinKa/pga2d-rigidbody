@@ -119,7 +119,7 @@ export function RigidBody2DElement(props: RigidBody2DElementProps) {
     const rbPos = useMemo(() => {
         return pga.pointCoordinates(
             pga.sandwichProduct(
-                pga.makeMultiVector({ e12: 1 }),
+                { e12: 1 },
                 rigidBody.motor
             )
         )

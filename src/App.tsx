@@ -25,35 +25,35 @@ function App() {
     const [time, setTime] = useState(0)
 
     const [body1, setBody1] = useState(rb.makeRigidBody2D(
-        pga.makeMultiVector({ scalar: 1 }),
-        pga.makeMultiVector({}),
+        { scalar: 1, e01: 0, e02: 0, e12: 0 },
+        { scalar: 0, e01: 0, e02: 0, e12: 0 },
         [
-            pga.makeMultiVector({ e01: -1, e02: -1, e12: 1 }),
-            pga.makeMultiVector({ e01: -1, e02: 1, e12: 1 }),
-            pga.makeMultiVector({ e01: 1, e02: 1, e12: 1 }),
-            pga.makeMultiVector({ e01: 1, e02: -1, e12: 1 })
+            { e01: -1, e02: -1, e12: 1 },
+            { e01: -1, e02: 1, e12: 1 },
+            { e01: 1, e02: 1, e12: 1 },
+            { e01: 1, e02: -1, e12: 1 }
         ]
     ))
 
     const [body2, setBody2] = useState(rb.makeRigidBody2D(
-        pga.makeMultiVector({ scalar: 1, e01: 10 }),
-        pga.makeMultiVector({}),
+        { scalar: 1, e01: 10, e02: 0, e12: 0 },
+        { scalar: 0, e01: 0, e02: 0, e12: 0 },
         [
-            pga.makeMultiVector({ e01: -1, e02: -1, e12: 1 }),
-            pga.makeMultiVector({ e01: -1, e02: 1, e12: 1 }),
-            pga.makeMultiVector({ e01: 1, e02: 1, e12: 1 }),
-            pga.makeMultiVector({ e01: 1, e02: -1, e12: 1 })
+            { e01: -1, e02: -1, e12: 1 },
+            { e01: -1, e02: 1, e12: 1 },
+            { e01: 1, e02: 1, e12: 1 },
+            { e01: 1, e02: -1, e12: 1 }
         ]
     ))
 
     const [floor, setFloor] = useState(rb.makeRigidBody2D(
-        pga.makeMultiVector({ scalar: 1, e02: -5, e12: 0.2 }),
-        pga.makeMultiVector({}),
+        { scalar: 1, e01: 0, e02: -5, e12: 0.2 },
+        { scalar: 0, e01: 0, e02: 0, e12: 0 },
         [
-            pga.makeMultiVector({ e01: -2, e02: -20, e12: 1 }),
-            pga.makeMultiVector({ e01: -2, e02: 20, e12: 1 }),
-            pga.makeMultiVector({ e01: 2, e02: 20, e12: 1 }),
-            pga.makeMultiVector({ e01: 2, e02: -20, e12: 1 })
+            { e01: -2, e02: -20, e12: 1 },
+            { e01: -2, e02: 20, e12: 1 },
+            { e01: 2, e02: 20, e12: 1 },
+            { e01: 2, e02: -20, e12: 1 }
         ]
     ))
 
@@ -61,7 +61,7 @@ function App() {
         return [body1, body2, floor]
     }, [body1, body2, floor])
 
-    const [lastCollInfo, setLastCollInfo] = useState<rb.SatCheckResults>({ line: pga.makeMultiVector({}), depth: 0, overlaps: false })
+    const [lastCollInfo, setLastCollInfo] = useState<rb.SatCheckResults>({ line: { e0: 0, e1: 0, e2: 0 }, depth: 0, overlaps: false })
     const [contactPointsWorld, setContactPointsWorld] = useState<pga.BiVector[]>([])
     const [body1Force, setBody1Force] = useState<pga.Vector | null>(null)
 
@@ -88,7 +88,7 @@ function App() {
                 stroke: "#CCFFFF99",
                 width: 0.2
             }] : []).concat([{
-                line: body1Force || pga.makeMultiVector({ e0: 1, e1: 1, e2: 1 }),
+                line: body1Force || { e0: 1, e1: 1, e2: 1 },
                 label: "Force",
                 stroke: "#FF00FF55",
                 width: 0.2
@@ -104,11 +104,12 @@ function App() {
         }
     }, [bodies, lastCollInfo, contactPointsWorld, body1Force, time])
 
-    const gravity = useMemo(() => {
-        return pga.makeMultiVector({
+    const gravity = useMemo<pga.Vector>(() => {
+        return {
             e0: 0,
-            e1: 20
-        })
+            e1: 20,
+            e2: 0
+        }
     }, [])
 
     const update = useCallback(() => {
@@ -128,14 +129,14 @@ function App() {
 
             const lineLength = Math.sqrt(coll.line.e1 * coll.line.e1 + coll.line.e2 * coll.line.e2)
 
-            const tangentDir = pga.makeMultiVector({
+            const tangentDir = {
                 e01: -coll.line.e1 / lineLength,
                 e02: coll.line.e2 / lineLength
-            })
+            }
 
             console.log("tangent:", tangentDir)
 
-            const rotor = pga.add(pga.makeMultiVector({ scalar: 1 }), pga.multiply(tangentDir, -coll.depth)) //pga.exponential(pga.multiply(tangent, coll.depth/2))
+            const rotor = pga.add({ scalar: 1 }, pga.multiply(tangentDir, -coll.depth)) //pga.exponential(pga.multiply(tangent, coll.depth/2))
             console.log("rotor:", rotor)
             newBody1.motor = pga.geometricProduct(rotor, newBody1.motor)
 

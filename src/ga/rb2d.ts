@@ -12,15 +12,15 @@ export type RigidBody2D = {
 
 export const makePointParticle2D = (motor: pga.Even, velocity: pga.Even) => {
     return {
-        motor: pga.makeMultiVector(motor),
-        velocity: pga.makeMultiVector(velocity)
+        motor: motor,
+        velocity: velocity
     }
 }
 
 export const makeRigidBody2D = (motor: pga.Even, velocity: pga.Even, points: pga.BiVector[]) => {
     return {
         ...makePointParticle2D(motor, velocity),
-        points: points.map(pga.makeMultiVector),
+        points: points,
         sleeping: false
     }
 }
