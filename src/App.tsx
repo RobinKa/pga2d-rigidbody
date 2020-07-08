@@ -95,10 +95,10 @@ function App() {
             }]),
             infos: [
                 `t: ${time.toFixed(3)}`,
-                //`P0: ${pga.repr(pga.sandwichProduct(pga.makeMultiVector({ e12: 1 }), bodies[0].motor))}`,
-                //`V0: ${pga.repr(bodies[0].velocity)}`,
-                //`P1: ${pga.repr(pga.sandwichProduct(pga.makeMultiVector({ e12: 1 }), bodies[1].motor))}`,
-                //`V1: ${pga.repr(bodies[1].velocity)}`,
+                `P0: ${pga.repr(pga.sandwichProduct({ e12: 1 }, bodies[0].motor))}`,
+                `V0: ${pga.repr(bodies[0].velocity)}`,
+                `P1: ${pga.repr(pga.sandwichProduct({ e12: 1 }, bodies[1].motor))}`,
+                `V1: ${pga.repr(bodies[1].velocity)}`,
                 `Coll depth: ${lastCollInfo.depth!.toFixed(5)}`
             ]
         }
